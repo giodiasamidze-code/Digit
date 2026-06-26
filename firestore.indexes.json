@@ -64,6 +64,16 @@
       ]
     },
     {
+      "collectionGroup": "conversations",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "customerId", "order": "ASCENDING" },
+        { "fieldPath": "type", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "serviceRequested", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "internalChatInbox",
       "queryScope": "COLLECTION",
       "fields": [

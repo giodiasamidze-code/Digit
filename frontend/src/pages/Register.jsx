@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import FirebaseSetupNotice from '../components/FirebaseSetupNotice'
 import {
@@ -10,6 +10,7 @@ import {
   validatePasswordMatch,
 } from '../utils/authErrors'
 import { getPostLoginRedirect } from '../utils/roles'
+import { getReturnPath } from '../utils/authRedirect'
 import usePageMeta from '../hooks/usePageMeta'
 import { pageTitle } from '../constants/brand'
 import './Auth.css'
@@ -18,6 +19,8 @@ function Register() {
   usePageMeta(pageTitle('რეგისტრაცია'), 'DIGIT — შექმენით ანგარიში და დაიწყეთ მუშაობა.')
   const { signup, loginWithGoogle, refreshUserProfile, isFirebaseConfigured } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const returnPath = getReturnPath(location.state?.from)
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -61,9 +64,9 @@ function Register() {
         return
       }
 
-      navigate(getPostLoginRedirect(
-        (await refreshUserProfile())?.role,
-      ), { replace: true })
+      navigate(getPostLoginRedirect((await refreshUserProfile())?.role, returnPath), {
+        replace: true,
+      })
     } catch (err) {
       setFormError(getAuthErrorMessage(err))
     } finally {
@@ -76,9 +79,9 @@ function Register() {
     setSubmitting(true)
     try {
       await loginWithGoogle()
-      navigate(getPostLoginRedirect(
-        (await refreshUserProfile())?.role,
-      ), { replace: true })
+      navigate(getPostLoginRedirect((await refreshUserProfile())?.role, returnPath), {
+        replace: true,
+      })
     } catch (err) {
       setFormError(getAuthErrorMessage(err))
     } finally {
@@ -224,7 +227,10 @@ function Register() {
           </button>
 
           <p className="auth-footer">
-            უკვე გაქვს ანგარიში? <Link to="/login">შესვლა</Link>
+            უკვე გაქვს ანგარიში?{' '}
+            <Link to="/login" state={{ from: location.state?.from }}>
+              შესვლა
+            </Link>
           </p>
         </div>
       </div>

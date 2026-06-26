@@ -167,6 +167,8 @@ function Dashboard({ initialTab = 'admin' }) {
         senderRole: role,
         price,
         description,
+        serviceType:
+          getServiceById(selectedConversation.serviceRequested)?.title || '',
       })
       setShowPriceOffer(false)
     } catch (err) {

@@ -38,10 +38,16 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/conversations/$(conversationId));
     }
 
+    function isAssignedConversationDeveloper(conversationId) {
+      return userRole() == 'developer'
+        && conversationDoc(conversationId).data.assignedDeveloperId == request.auth.uid;
+    }
+
     function conversationParticipant(conversationId) {
       return request.auth != null && (
         conversationDoc(conversationId).data.customerId == request.auth.uid
         || (isStaff() && conversationDoc(conversationId).data.type == staffRole())
+        || isAssignedConversationDeveloper(conversationId)
       );
     }
 
@@ -220,11 +226,15 @@ service cloud.firestore {
       allow read: if request.auth != null && (
         resource.data.customerId == request.auth.uid
         || (isStaff() && resource.data.type == staffRole())
+        || (userRole() == 'developer' && resource.data.assignedDeveloperId == request.auth.uid)
       );
 
       allow update: if request.auth != null && (
         resource.data.customerId == request.auth.uid
         || (isStaff() && resource.data.type == staffRole())
+        || (userRole() == 'developer'
+          && resource.data.assignedDeveloperId == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessageAt', 'lastMessageText']))
       );
 
       allow delete: if isManager();

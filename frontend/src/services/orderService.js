@@ -3,6 +3,7 @@ import {
   arrayUnion,
   collection,
   doc,
+  getDoc,
   onSnapshot,
   orderBy,
   query,
@@ -440,12 +441,27 @@ export async function updateDeveloperOrderStatus(orderId, status) {
 
 export async function assignDeveloperToOrder(orderId, { developerId, developerName }) {
   const firestore = requireDb()
-  await updateDoc(doc(firestore, 'orders', orderId), {
+  const orderRef = doc(firestore, 'orders', orderId)
+  const orderSnap = await getDoc(orderRef)
+
+  if (!orderSnap.exists()) {
+    throw new Error('შეკვეთა ვერ მოიძებნა.')
+  }
+
+  const order = orderSnap.data()
+
+  await updateDoc(orderRef, {
     assignedDeveloperId: developerId,
     assignedDeveloperName: developerName,
     status: ORDER_STATUS.ASSIGNED,
     updatedAt: serverTimestamp(),
   })
+
+  if (order.conversationId) {
+    await updateDoc(doc(firestore, 'conversations', order.conversationId), {
+      assignedDeveloperId: developerId,
+    })
+  }
 }
 
 export async function updateOrderStatus(orderId, status) {

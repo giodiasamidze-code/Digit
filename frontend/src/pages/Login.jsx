@@ -8,6 +8,7 @@ import {
   validatePassword,
 } from '../utils/authErrors'
 import { getPostLoginRedirect } from '../utils/roles'
+import { getReturnPath } from '../utils/authRedirect'
 import usePageMeta from '../hooks/usePageMeta'
 import { pageTitle } from '../constants/brand'
 import './Auth.css'
@@ -17,10 +18,7 @@ function Login() {
   const { user, userProfile, loading, login, loginWithGoogle, resetPassword, refreshUserProfile, isFirebaseConfigured } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const fromLocation = location.state?.from
-  const from = fromLocation
-    ? `${fromLocation.pathname}${fromLocation.search || ''}${fromLocation.hash || ''}`
-    : '/'
+  const from = getReturnPath(location.state?.from)
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -187,13 +185,16 @@ function Login() {
             type="button"
             className="btn btn--outline auth-google"
             onClick={handleGoogleLogin}
-            disabled={submitting}
+            disabled={submitting || !isFirebaseConfigured}
           >
             Google-ით შესვლა
           </button>
 
           <p className="auth-footer">
-            არ გაქვს ანგარიში? <Link to="/register">რეგისტრაცია</Link>
+            არ გაქვს ანგარიში?{' '}
+            <Link to="/register" state={{ from: location.state?.from }}>
+              რეგისტრაცია
+            </Link>
           </p>
         </div>
       </div>

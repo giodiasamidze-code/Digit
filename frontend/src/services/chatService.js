@@ -49,21 +49,21 @@ export async function findOrCreateOpenConversation({
 }) {
   const firestore = requireDb()
   const conversationsRef = collection(firestore, 'conversations')
-  const openQuery = query(
-    conversationsRef,
+  const filters = [
     where('customerId', '==', customerId),
     where('type', '==', type),
     where('status', '==', 'open'),
-  )
+  ]
 
+  if (serviceRequested) {
+    filters.push(where('serviceRequested', '==', serviceRequested))
+  }
+
+  const openQuery = query(conversationsRef, ...filters)
   const snapshot = await getDocs(openQuery)
 
   if (!snapshot.empty) {
-    const existingDoc = snapshot.docs[0]
-    if (serviceRequested && existingDoc.data().serviceRequested !== serviceRequested) {
-      await updateDoc(existingDoc.ref, { serviceRequested })
-    }
-    return existingDoc.id
+    return snapshot.docs[0].id
   }
 
   const newConversation = await addDoc(conversationsRef, {
@@ -72,6 +72,7 @@ export async function findOrCreateOpenConversation({
     type,
     status: 'open',
     serviceRequested,
+    assignedDeveloperId: null,
     lastMessageText: '',
     createdAt: serverTimestamp(),
     lastMessageAt: serverTimestamp(),
@@ -159,7 +160,10 @@ export async function sendServiceRequestMessage(conversationId, { senderId, serv
   await updateConversationMeta(conversationId, text)
 }
 
-export async function sendPriceOffer(conversationId, { senderId, senderRole, price, description }) {
+export async function sendPriceOffer(
+  conversationId,
+  { senderId, senderRole, price, description, serviceType = '' },
+) {
   const firestore = requireDb()
   const numericPrice = Number(price)
   const text = `ფასის შეთავაზება: ${numericPrice} ₾`
@@ -171,6 +175,7 @@ export async function sendPriceOffer(conversationId, { senderId, senderRole, pri
     text,
     price: numericPrice,
     description: description.trim(),
+    serviceType: serviceType.trim(),
     status: 'pending',
     createdAt: serverTimestamp(),
   })

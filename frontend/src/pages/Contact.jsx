@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { Phone, Mail, Clock, User, Code2 } from 'lucide-react'
+import { Phone, Mail, Clock, User } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import ClickActionsPanel from '../components/ClickActionsPanel'
 import FirebaseSetupNotice from '../components/FirebaseSetupNotice'
@@ -9,7 +9,6 @@ import usePageMeta from '../hooks/usePageMeta'
 import { CONTACT_EMAIL, pageTitle } from '../constants/brand'
 import { getServiceById } from '../data/services'
 import {
-  CUSTOMER_DEVELOPER_ACTIONS,
   CUSTOMER_MANAGER_ACTIONS,
 } from '../constants/clickActions'
 import {
@@ -35,14 +34,6 @@ const TABS = {
     actions: CUSTOMER_MANAGER_ACTIONS,
     emptyHint: 'აირჩიეთ მოქმედება — მენეჯერი მალე გიპასუხებთ.',
   },
-  developer: {
-    id: 'developer',
-    label: 'დეველოპერთან',
-    icon: Code2,
-    name: 'ნიკა — დეველოპერი',
-    actions: CUSTOMER_DEVELOPER_ACTIONS,
-    emptyHint: 'აირჩიეთ მოქმედება — დეველოპერი მალე გიპასუხებთ.',
-  },
 }
 
 function Contact() {
@@ -56,6 +47,7 @@ function Contact() {
   const serviceId = searchParams.get('service')
   const autoRequest = searchParams.get('autoRequest') === '1'
   const selectedService = serviceId ? getServiceById(serviceId) : null
+  const unknownService = Boolean(serviceId && !selectedService)
 
   const [activeTab, setActiveTab] = useState('manager')
   const [conversationId, setConversationId] = useState(null)
@@ -149,6 +141,7 @@ function Contact() {
     if (
       !autoRequest ||
       !selectedService ||
+      unknownService ||
       !displayConversationId ||
       !user ||
       activeTab !== 'manager' ||
@@ -188,6 +181,7 @@ function Contact() {
     user,
     activeTab,
     loadingActions,
+    unknownService,
     displayMessages,
   ])
 
@@ -297,6 +291,9 @@ function Contact() {
 
       <div className="page contact-page">
         <div className="container">
+          {unknownService && (
+            <div className="contact-page__error">მითითებული სერვისი ვერ მოიძებნა.</div>
+          )}
           {actionError && <div className="contact-page__error">{actionError}</div>}
           {!isFirebaseConfigured && (
             <div className="container" style={{ marginBottom: '1rem' }}>

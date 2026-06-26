@@ -29,11 +29,14 @@ const firebaseConfig = {
 }
 
 const PLACEHOLDER_PATTERNS = ['your_', 'placeholder']
+const DEMO_PROJECT_IDS = ['demo-homework']
 
 function isMissingOrPlaceholder(value) {
   if (!value || typeof value !== 'string') return true
   const lower = value.toLowerCase()
-  return PLACEHOLDER_PATTERNS.some((p) => lower.includes(p))
+  if (PLACEHOLDER_PATTERNS.some((p) => lower.includes(p))) return true
+  if (lower.includes('demokey') || lower.includes('forlocal')) return true
+  return false
 }
 
 const missingKeys = Object.entries({
@@ -47,7 +50,15 @@ const missingKeys = Object.entries({
   .filter(([, value]) => isMissingOrPlaceholder(value))
   .map(([key]) => key)
 
-export const isFirebaseConfigured = missingKeys.length === 0
+export const isFirebaseConfigured = (() => {
+  const hasAllValues = Object.values(firebaseConfig).every(
+    (value) => value && !isMissingOrPlaceholder(value),
+  )
+  if (!hasAllValues) return false
+  if (import.meta.env.PROD && DEMO_PROJECT_IDS.includes(firebaseConfig.projectId)) return false
+  return true
+})()
+
 export const useFirebaseEmulator =
   import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true' && import.meta.env.DEV
 
@@ -73,7 +84,7 @@ if (isFirebaseConfigured) {
 } else if (import.meta.env.DEV) {
   console.warn(
     `[Firebase] კონფიგურაცია არ არის დაყენებული: ${missingKeys.join(', ')}. ` +
-      'შეავსე .env ფაილი და გადატვირთე dev server.',
+      'შეავსე frontend/.env ფაილი და გადატვირთე dev server.',
   )
 }
 

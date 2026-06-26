@@ -1,8 +1,8 @@
 {
-  "apiKey": "",
-  "authDomain": "",
-  "projectId": "",
-  "storageBucket": "",
-  "messagingSenderId": "",
-  "appId": ""
+  "apiKey": "AIzaSyDemoKeyForLocalEmulatorOnly123456",
+  "authDomain": "demo-homework.firebaseapp.com",
+  "projectId": "demo-homework",
+  "storageBucket": "demo-homework.appspot.com",
+  "messagingSenderId": "123456789012",
+  "appId": "1:123456789012:web:abc123def456"
 }

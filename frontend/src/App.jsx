@@ -13,6 +13,8 @@ import DeveloperDashboard from './pages/DeveloperDashboard'
 import CustomerDashboard from './pages/CustomerDashboard'
 import Admin from './pages/Admin'
 
+import NotFound from './pages/NotFound'
+
 function App() {
   return (
     <AuthProvider>
@@ -87,6 +89,8 @@ function App() {
             </RoleProtectedRoute>
           }
         />
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </AuthProvider>
   )

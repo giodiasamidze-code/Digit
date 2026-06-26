@@ -76,8 +76,8 @@ export function AuthProvider({ children }) {
           if (profile) {
             await ensureUserRegistrationFromProfile(firebaseUser.uid, profile)
           }
-        } catch {
-          setUserProfile(null)
+        } catch (err) {
+          console.error('Profile load failed:', err)
         }
       } else {
         setUserProfile(null)
