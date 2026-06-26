@@ -68,7 +68,7 @@ function AdminLogin({ onLoggedIn, adminSeedError, accessError }) {
           )}
         </div>
 
-        {!isFirebaseConfigured && <FirebaseSetupNotice />}
+        {!isFirebaseConfigured && <FirebaseSetupNotice variant="compact" />}
         {(adminSeedError || accessError || formError) && (
           <div className="admin-login__alerts">
             {adminSeedError && <div className="auth-form__alert">{adminSeedError}</div>}

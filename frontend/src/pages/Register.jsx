@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import FirebaseSetupNotice from '../components/FirebaseSetupNotice'
 import {
   getAuthErrorMessage,
   validateEmail,
@@ -95,8 +94,6 @@ function Register() {
         <div className="auth-card">
           <h1 className="auth-card__title">რეგისტრაცია</h1>
           <p className="auth-card__subtitle">შექმენი ანგარიში და დაიწყე</p>
-
-          {!isFirebaseConfigured && <FirebaseSetupNotice />}
 
           {formError && <div className="auth-form__alert">{formError}</div>}
           {successMessage && <div className="auth-form__success">{successMessage}</div>}

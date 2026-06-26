@@ -4,6 +4,12 @@
 
 [build.environment]
   VITE_USE_FIREBASE_EMULATOR = "false"
+  VITE_FIREBASE_API_KEY = "AIzaSyAN5HZVSpreHSVjWulOhjOdJBMf58En_oc"
+  VITE_FIREBASE_AUTH_DOMAIN = "digit-96a35.firebaseapp.com"
+  VITE_FIREBASE_PROJECT_ID = "digit-96a35"
+  VITE_FIREBASE_STORAGE_BUCKET = "digit-96a35.firebasestorage.app"
+  VITE_FIREBASE_MESSAGING_SENDER_ID = "127296507121"
+  VITE_FIREBASE_APP_ID = "1:127296507121:web:9e47bd649f46a835b16d50"
 
 [[redirects]]
   from = "/*"

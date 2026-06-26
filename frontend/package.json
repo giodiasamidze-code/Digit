@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node ../scripts/prepare-firebase-config.mjs && vite",
     "build": "node ../scripts/prepare-firebase-config.mjs && vite build",
     "lint": "eslint .",
     "preview": "vite preview"

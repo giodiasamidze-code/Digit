@@ -3,7 +3,6 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { Phone, Mail, Clock, User } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import ClickActionsPanel from '../components/ClickActionsPanel'
-import FirebaseSetupNotice from '../components/FirebaseSetupNotice'
 import Reveal from '../components/Reveal'
 import usePageMeta from '../hooks/usePageMeta'
 import { CONTACT_EMAIL, pageTitle } from '../constants/brand'
@@ -295,11 +294,6 @@ function Contact() {
             <div className="contact-page__error">მითითებული სერვისი ვერ მოიძებნა.</div>
           )}
           {actionError && <div className="contact-page__error">{actionError}</div>}
-          {!isFirebaseConfigured && (
-            <div className="container" style={{ marginBottom: '1rem' }}>
-              <FirebaseSetupNotice />
-            </div>
-          )}
 
           <div className="contact-layout">
             <aside className="contact-sidebar">

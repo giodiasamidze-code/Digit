@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import FirebaseSetupNotice from '../components/FirebaseSetupNotice'
 import {
   getAuthErrorMessage,
   validateEmail,
@@ -115,8 +114,6 @@ function Login() {
         <div className="auth-card">
           <h1 className="auth-card__title">შესვლა</h1>
           <p className="auth-card__subtitle">შედი ანგარიშში და გააგრძელე</p>
-
-          {!isFirebaseConfigured && <FirebaseSetupNotice />}
 
           {formError && <div className="auth-form__alert">{formError}</div>}
           {resetSent && (

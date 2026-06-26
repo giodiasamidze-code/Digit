@@ -51,7 +51,10 @@ async function ensureGoogleUserDocument(user) {
 
 function assertFirebase() {
   if (!isFirebaseConfigured || !auth || !db) {
-    throw new Error('Firebase არ არის კონფიგურირებული. შეავსე .env ფაილი.')
+    const hint = import.meta.env.PROD
+      ? 'Netlify-ზე დაამატე Firebase environment variables და გადააგენერირე deploy.'
+      : 'შეავსე frontend/.env ფაილი და გაუშვი npm run dev:all.'
+    throw new Error(`Firebase არ არის კონფიგურირებული. ${hint}`)
   }
 }
 

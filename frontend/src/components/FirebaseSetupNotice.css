@@ -44,3 +44,12 @@
   padding: 0;
   list-style: disc;
 }
+
+.firebase-setup--compact {
+  margin-bottom: 0.75rem;
+  padding: 0.875rem 1rem;
+}
+
+.firebase-setup--compact .firebase-setup__text {
+  margin-bottom: 0;
+}

@@ -19,7 +19,8 @@
     "install:all": "npm install && npm install --prefix frontend",
     "firebase-deploy-rules": "firebase deploy --only firestore:rules",
     "firebase-deploy-indexes": "firebase deploy --only firestore:indexes",
-    "firebase-deploy-firestore": "firebase deploy --only firestore"
+    "firebase-deploy-firestore": "firebase deploy --only firestore",
+    "deploy:firestore": "node scripts/deploy-firestore.mjs"
   },
   "devDependencies": {
     "firebase": "^12.15.0",
