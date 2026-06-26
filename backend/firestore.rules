@@ -1,0 +1,314 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function userDocPath() {
+      return /databases/$(database)/documents/users/$(request.auth.uid);
+    }
+
+    function userDoc() {
+      return get(userDocPath());
+    }
+
+    function hasUserProfile() {
+      return request.auth != null && exists(userDocPath());
+    }
+
+    function userRole() {
+      return hasUserProfile() ? userDoc().data.role : null;
+    }
+
+    function isStaff() {
+      return userRole() in ['manager', 'developer'];
+    }
+
+    function isManager() {
+      return userRole() == 'manager';
+    }
+
+    function isAssignedDeveloper(orderData) {
+      return userRole() == 'developer'
+        && orderData.assignedDeveloperId == request.auth.uid;
+    }
+
+    function staffRole() {
+      return userRole();
+    }
+
+    function conversationDoc(conversationId) {
+      return get(/databases/$(database)/documents/conversations/$(conversationId));
+    }
+
+    function conversationParticipant(conversationId) {
+      return request.auth != null && (
+        conversationDoc(conversationId).data.customerId == request.auth.uid
+        || (isStaff() && conversationDoc(conversationId).data.type == staffRole())
+      );
+    }
+
+    function messageTypeField() {
+      return !('type' in request.resource.data) || request.resource.data.type == 'text'
+        ? 'text'
+        : request.resource.data.type;
+    }
+
+    function isValidTextMessage(conversationId) {
+      return request.resource.data.text is string
+        && request.resource.data.senderId == request.auth.uid
+        && (
+          (request.resource.data.senderRole == 'customer'
+            && conversationDoc(conversationId).data.customerId == request.auth.uid)
+          || (isStaff()
+            && request.resource.data.senderRole == staffRole())
+        );
+    }
+
+    function internalChatDoc(chatId) {
+      return get(/databases/$(database)/documents/internalChats/$(chatId));
+    }
+
+    function isInternalChatParticipant(chatId) {
+      return isStaff()
+        && exists(/databases/$(database)/documents/internalChats/$(chatId))
+        && internalChatDoc(chatId).data.participantIds is list
+        && request.auth.uid in internalChatDoc(chatId).data.participantIds;
+    }
+
+    function isParticipantOfInternalChatData(data) {
+      return data != null
+        && data.participantIds is list
+        && request.auth.uid in data.participantIds;
+    }
+
+    function validUserCreate() {
+      return request.resource.data.role == 'customer'
+        && request.resource.data.developerRequestStatus in ['none', 'pending'];
+    }
+
+    function isBootstrapManagerCreate(userId) {
+      return request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.role == 'manager'
+        && request.resource.data.email == 'admin@gmail.com'
+        && request.resource.data.developerRequestStatus == 'none';
+    }
+
+    function validUserSelfUpdate() {
+      return request.resource.data.role == resource.data.role
+        && (
+          request.resource.data.developerRequestStatus == resource.data.developerRequestStatus
+          || (
+            resource.data.developerRequestStatus in ['none', 'rejected']
+            && request.resource.data.developerRequestStatus == 'pending'
+          )
+        );
+    }
+
+    match /users/{userId} {
+      allow get: if request.auth != null && (
+        request.auth.uid == userId
+        || isManager()
+        || (isStaff()
+          && resource.data.keys().hasAll(['role'])
+          && resource.data.role in ['manager', 'developer'])
+      );
+
+      allow list: if isManager()
+        && resource.data.keys().hasAll(['developerRequestStatus'])
+        && resource.data.developerRequestStatus == 'pending';
+
+      allow list: if isManager()
+        && resource.data.keys().hasAll(['developerRequestStatus'])
+        && resource.data.developerRequestStatus == 'approved';
+
+      allow list: if isManager()
+        && resource.data.keys().hasAll(['developerRequestStatus'])
+        && resource.data.developerRequestStatus == 'rejected';
+
+      allow list: if isStaff()
+        && resource.data.keys().hasAll(['role'])
+        && (resource.data.role == 'developer' || resource.data.role == 'manager');
+
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && (validUserCreate() || isBootstrapManagerCreate(userId));
+
+      allow update: if request.auth != null && (
+        (request.auth.uid == userId && validUserSelfUpdate())
+        || isManager()
+      );
+
+      match /internalChatInbox/{chatId} {
+        allow list, get: if request.auth.uid == userId && isStaff();
+
+        allow create, update: if isStaff()
+          && exists(/databases/$(database)/documents/internalChats/$(chatId))
+          && request.auth.uid in get(/databases/$(database)/documents/internalChats/$(chatId)).data.participantIds
+          && userId in get(/databases/$(database)/documents/internalChats/$(chatId)).data.participantIds;
+
+        allow delete: if request.auth.uid == userId && isStaff();
+      }
+    }
+
+    match /registrations/{registrationId} {
+      allow read: if isManager()
+        || (request.auth != null && request.auth.uid == registrationId);
+
+      allow create: if request.auth != null
+        && request.auth.uid == registrationId
+        && request.resource.data.uid == registrationId
+        && request.resource.data.email is string
+        && request.resource.data.name is string
+        && request.resource.data.accountType in ['customer', 'developer']
+        && request.resource.data.role is string
+        && request.resource.data.developerRequestStatus is string;
+
+      allow update: if isManager()
+        || (
+          request.auth.uid == registrationId
+          && request.resource.data.uid == registrationId
+        );
+    }
+
+    match /orders/{orderId} {
+      allow read: if request.auth != null && (
+        isManager()
+        || isAssignedDeveloper(resource.data)
+        || resource.data.customerId == request.auth.uid
+      );
+
+      allow create: if (
+        isManager()
+        && request.resource.data.status == 'new'
+        && request.resource.data.customerId is string
+        && request.resource.data.conversationId is string
+      ) || (
+        request.auth != null
+        && request.resource.data.customerId == request.auth.uid
+        && request.resource.data.status == 'new'
+        && request.resource.data.conversationId is string
+        && request.resource.data.customerName is string
+        && request.resource.data.serviceType is string
+        && request.resource.data.description is string
+        && request.resource.data.assignedDeveloperId == null
+        && request.resource.data.paymentStatus == 'unpaid'
+        && request.resource.data.payoutStatus == 'pending'
+      );
+
+      allow update: if isManager()
+        || (
+          isAssignedDeveloper(resource.data)
+          && request.resource.data.status in ['in_progress', 'completed']
+          && request.resource.data.assignedDeveloperId == resource.data.assignedDeveloperId
+          && request.resource.data.assignedDeveloperName == resource.data.assignedDeveloperName
+          && request.resource.data.customerId == resource.data.customerId
+          && request.resource.data.customerName == resource.data.customerName
+          && request.resource.data.conversationId == resource.data.conversationId
+          && request.resource.data.serviceType == resource.data.serviceType
+          && request.resource.data.description == resource.data.description
+          && request.resource.data.managerNotes == resource.data.managerNotes
+          && request.resource.data.price == resource.data.price
+          && request.resource.data.paymentStatus == resource.data.paymentStatus
+          && request.resource.data.developerPayout == resource.data.developerPayout
+          && request.resource.data.payoutStatus == resource.data.payoutStatus
+        );
+    }
+
+    match /conversations/{conversationId} {
+      allow create: if request.auth != null
+        && request.resource.data.customerId == request.auth.uid;
+
+      allow read: if request.auth != null && (
+        resource.data.customerId == request.auth.uid
+        || (isStaff() && resource.data.type == staffRole())
+      );
+
+      allow update: if request.auth != null && (
+        resource.data.customerId == request.auth.uid
+        || (isStaff() && resource.data.type == staffRole())
+      );
+
+      allow delete: if isManager();
+
+      match /messages/{messageId} {
+        allow read: if conversationParticipant(conversationId);
+
+        allow create: if conversationParticipant(conversationId) && (
+          (messageTypeField() == 'text' && isValidTextMessage(conversationId))
+          || (
+            messageTypeField() == 'service_request'
+            && conversationDoc(conversationId).data.customerId == request.auth.uid
+            && request.resource.data.senderId == request.auth.uid
+            && request.resource.data.senderRole == 'customer'
+            && request.resource.data.text is string
+            && request.resource.data.serviceType is string
+          )
+          || (
+            messageTypeField() == 'price_offer'
+            && isManager()
+            && request.resource.data.senderId == request.auth.uid
+            && request.resource.data.senderRole == 'manager'
+            && request.resource.data.text is string
+            && request.resource.data.price is number
+            && request.resource.data.description is string
+            && request.resource.data.status == 'pending'
+          )
+          || (
+            messageTypeField() == 'system'
+            && request.resource.data.senderRole == 'system'
+            && request.resource.data.text is string
+          )
+        );
+
+        allow update: if conversationDoc(conversationId).data.customerId == request.auth.uid
+          && resource.data.type == 'price_offer'
+          && resource.data.status == 'pending'
+          && request.resource.data.type == 'price_offer'
+          && request.resource.data.status in ['accepted', 'declined']
+          && request.resource.data.price == resource.data.price
+          && request.resource.data.description == resource.data.description
+          && request.resource.data.senderId == resource.data.senderId
+          && request.resource.data.senderRole == resource.data.senderRole
+          && request.resource.data.text == resource.data.text;
+
+        allow delete: if isManager();
+      }
+    }
+
+    match /internalChats/{chatId} {
+      allow get: if (
+        isStaff()
+        && !exists(/databases/$(database)/documents/internalChats/$(chatId))
+      ) || (
+        resource.data.participantIds is list
+        && request.auth.uid in resource.data.participantIds
+      );
+
+      allow create: if isStaff()
+        && request.resource.data.participantIds is list
+        && request.resource.data.participantIds.size() == 2
+        && request.auth.uid in request.resource.data.participantIds
+        && request.resource.data.participantPairKey == chatId
+        && request.resource.data.participantNames is map
+        && request.resource.data.lastMessageText is string
+        && request.resource.data.lastMessageReadBy is list;
+
+      allow update: if isStaff()
+        && isParticipantOfInternalChatData(resource.data);
+
+      allow delete: if isStaff()
+        && isParticipantOfInternalChatData(resource.data);
+
+      match /messages/{messageId} {
+        allow read: if isInternalChatParticipant(chatId);
+
+        allow create: if isInternalChatParticipant(chatId)
+          && request.resource.data.senderId == request.auth.uid
+          && request.resource.data.senderName is string
+          && request.resource.data.text is string
+          && request.resource.data.createdAt == request.time;
+
+        allow delete: if isInternalChatParticipant(chatId);
+      }
+    }
+  }
+}

@@ -1,0 +1,298 @@
+.click-actions {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+
+.click-actions__history {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  min-height: 200px;
+}
+
+.click-actions__history-label,
+.click-actions__panel-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.click-actions__empty {
+  margin: auto;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  max-width: 320px;
+}
+
+.click-actions__bubble {
+  max-width: 85%;
+  padding: 0.625rem 0.875rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.click-actions__bubble--user,
+.click-actions__bubble--staff {
+  align-self: flex-end;
+  background: rgba(180, 84, 46, 0.12);
+  color: var(--primary-color);
+  border: 1px solid rgba(180, 84, 46, 0.2);
+}
+
+.click-actions__bubble--bot,
+.click-actions__bubble--customer {
+  align-self: flex-start;
+  background: var(--bg-alt);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.click-actions__time {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.click-actions__panel {
+  padding: 1rem 1.25rem 1.25rem;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-alt);
+}
+
+.click-actions__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.625rem;
+}
+
+.click-actions__btn {
+  padding: 0.75rem 0.875rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  color: var(--primary-color);
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition:
+    border-color var(--transition),
+    background-color var(--transition),
+    transform var(--transition);
+}
+
+.click-actions__btn:hover:not(:disabled) {
+  border-color: var(--secondary-color);
+  background: rgba(180, 84, 46, 0.06);
+}
+
+.click-actions__btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.click-actions__btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.click-actions__message {
+  max-width: 92%;
+}
+
+.click-actions__message--request {
+  align-self: flex-start;
+}
+
+.click-actions__message--system {
+  align-self: center;
+  width: 100%;
+  max-width: 100%;
+}
+
+.click-actions__message--offer {
+  align-self: flex-start;
+  width: 100%;
+  max-width: 340px;
+}
+
+.click-actions__service-request {
+  padding: 0.875rem 1rem;
+  background: rgba(180, 84, 46, 0.08);
+  border: 1px dashed rgba(180, 84, 46, 0.35);
+  border-radius: var(--radius-md);
+}
+
+.click-actions__service-request-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--primary-color);
+}
+
+.click-actions__service-request-type {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  background: rgba(180, 84, 46, 0.12);
+  border-radius: var(--radius-sm);
+}
+
+.click-actions__system {
+  width: 100%;
+  text-align: center;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  background: var(--bg-alt);
+  border-radius: var(--radius-md);
+}
+
+.click-actions__system p {
+  margin: 0;
+}
+
+.click-actions__offer {
+  padding: 1rem 1.125rem;
+  background: linear-gradient(135deg, rgba(180, 84, 46, 0.1), rgba(180, 84, 46, 0.04));
+  border: 2px solid rgba(180, 84, 46, 0.28);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 14px rgba(180, 84, 46, 0.08);
+}
+
+.click-actions__offer-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--primary-color);
+}
+
+.click-actions__offer-price {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--primary-color);
+}
+
+.click-actions__offer-desc {
+  margin: 0.625rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--text-color);
+}
+
+.click-actions__offer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.click-actions__offer-decline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 0.25rem;
+}
+
+.click-actions__offer-decline textarea {
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  resize: vertical;
+}
+
+.click-actions__offer-decline-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.click-actions__offer-btn {
+  padding: 0.5rem 0.875rem;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: opacity var(--transition), transform var(--transition);
+}
+
+.click-actions__offer-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.click-actions__offer-btn--accept {
+  color: #fff;
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.click-actions__offer-btn--accept:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.click-actions__offer-btn--decline {
+  color: #b42318;
+  background: #fff;
+  border-color: #fecdca;
+}
+
+.click-actions__offer-btn--ghost {
+  color: var(--text-muted);
+  background: transparent;
+  border-color: var(--border-color);
+}
+
+.click-actions__offer-badge {
+  display: inline-block;
+  margin-top: 0.875rem;
+  padding: 0.35rem 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+}
+
+.click-actions__offer-badge--accepted {
+  color: #027a48;
+  background: #ecfdf3;
+  border: 1px solid #abefc6;
+}
+
+.click-actions__offer-badge--declined {
+  color: #b42318;
+  background: #fef3f2;
+  border: 1px solid #fecdca;
+}
+
+@media (max-width: 640px) {
+  .click-actions__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

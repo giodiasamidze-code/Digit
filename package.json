@@ -1,0 +1,28 @@
+{
+  "name": "homework",
+  "private": true,
+  "version": "0.0.0",
+  "description": "DIGIT — სერვისების პლატფორმა",
+  "scripts": {
+    "dev": "npm run dev --prefix frontend",
+    "dev:emulator": "node scripts/seed-admin.mjs && npm run dev --prefix frontend",
+    "dev:all": "node scripts/run-dev-all.mjs",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "free-ports": "node scripts/free-emulator-ports.mjs",
+    "seed-admin": "node scripts/seed-admin.mjs",
+    "clear-data": "node scripts/clear-emulator-data.mjs",
+    "reset-emulator": "node scripts/reset-emulator.mjs",
+    "emulators": "node scripts/run-emulators.mjs",
+    "build": "npm run build --prefix frontend",
+    "lint": "npm run lint --prefix frontend",
+    "preview": "npm run preview --prefix frontend",
+    "install:all": "npm install && npm install --prefix frontend",
+    "firebase-deploy-rules": "firebase deploy --only firestore:rules",
+    "firebase-deploy-indexes": "firebase deploy --only firestore:indexes",
+    "firebase-deploy-firestore": "firebase deploy --only firestore"
+  },
+  "devDependencies": {
+    "firebase": "^12.15.0",
+    "firebase-tools": "^14.9.0"
+  }
+}

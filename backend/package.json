@@ -1,0 +1,6 @@
+{
+  "name": "homework-backend",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Firestore rules and backend configuration"
+}

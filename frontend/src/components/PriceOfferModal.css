@@ -1,0 +1,82 @@
+.price-offer-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.price-offer-modal {
+  width: 100%;
+  max-width: 440px;
+  padding: 1.5rem;
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.price-offer-modal__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+  color: var(--text-color);
+}
+
+.price-offer-modal__hint {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.price-offer-modal__error {
+  margin-bottom: 1rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  color: #b42318;
+  background: #fef3f2;
+  border: 1px solid #fecdca;
+  border-radius: var(--radius-md);
+}
+
+.price-offer-modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.price-offer-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.price-offer-modal__field input,
+.price-offer-modal__field textarea {
+  padding: 0.625rem 0.75rem;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+
+.price-offer-modal__field input:focus,
+.price-offer-modal__field textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.price-offer-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.625rem;
+  margin-top: 0.25rem;
+}
