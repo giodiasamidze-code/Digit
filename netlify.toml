@@ -1,6 +1,9 @@
 [build]
-  command = "npm run install:all && npm run build"
+  command = "npm run install:all && node scripts/prepare-firebase-config.mjs && npm run build"
   publish = "frontend/dist"
+
+[build.environment]
+  VITE_USE_FIREBASE_EMULATOR = "false"
 
 [[redirects]]
   from = "/*"

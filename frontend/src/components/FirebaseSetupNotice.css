@@ -38,3 +38,9 @@
   color: var(--secondary-color);
   font-weight: 600;
 }
+
+.firebase-setup__env-list {
+  margin: 0.5rem 0 0 1rem;
+  padding: 0;
+  list-style: disc;
+}
