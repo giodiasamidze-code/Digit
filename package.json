@@ -20,10 +20,12 @@
     "firebase-deploy-rules": "firebase deploy --only firestore:rules",
     "firebase-deploy-indexes": "firebase deploy --only firestore:indexes",
     "firebase-deploy-firestore": "firebase deploy --only firestore",
-    "deploy:firestore": "node scripts/deploy-firestore.mjs"
+    "deploy:firestore": "node scripts/deploy-firestore.mjs",
+    "setup:production": "node scripts/setup-production.mjs"
   },
   "devDependencies": {
     "firebase": "^12.15.0",
-    "firebase-tools": "^14.9.0"
+    "firebase-tools": "^14.9.0",
+    "netlify-cli": "^26.1.0"
   }
 }

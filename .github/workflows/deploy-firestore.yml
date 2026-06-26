@@ -1,0 +1,33 @@
+name: Deploy Firestore
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - backend/firestore.rules
+      - firestore.indexes.json
+      - .github/workflows/deploy-firestore.yml
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Deploy Firestore rules and indexes
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          if [ -z "$FIREBASE_TOKEN" ]; then
+            echo "FIREBASE_TOKEN secret not set — skip. Run: firebase login:ci"
+            exit 0
+          fi
+          npx firebase deploy --only firestore --project digit-96a35 --token "$FIREBASE_TOKEN"
