@@ -1,0 +1,42 @@
+name: Bootstrap production manager
+
+on:
+  workflow_dispatch:
+    inputs:
+      email:
+        description: Manager email
+        required: true
+        default: giorgidiasamidze848@gmail.com
+      password:
+        description: Account password (min 6 chars; leave empty to only send reset email)
+        required: false
+        type: string
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Bootstrap manager account
+        env:
+          BOOTSTRAP_PASSWORD: ${{ inputs.password }}
+        run: |
+          if [ -n "$BOOTSTRAP_PASSWORD" ]; then
+            node scripts/bootstrap-production-via-api.mjs "${{ inputs.email }}" "$BOOTSTRAP_PASSWORD"
+          else
+            node scripts/send-password-reset.mjs "${{ inputs.email }}"
+          fi
+
+      - name: Promote to manager with service account
+        continue-on-error: true
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node scripts/promote-manager-admin.mjs "${{ inputs.email }}"

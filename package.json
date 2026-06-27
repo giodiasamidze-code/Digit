@@ -22,6 +22,8 @@
     "firebase-deploy-firestore": "firebase deploy --only firestore",
     "deploy:firestore": "node scripts/deploy-firestore.mjs",
     "seed-production-manager": "node scripts/seed-production-manager.mjs",
+    "bootstrap-production": "node scripts/bootstrap-production-via-api.mjs",
+    "send-password-reset": "node scripts/send-password-reset.mjs",
     "setup:production": "node scripts/setup-production.mjs"
   },
   "devDependencies": {
