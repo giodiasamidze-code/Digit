@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import {
-  MessageCircle,
+  MousePointerClick,
   UserSearch,
   ShieldCheck,
   CheckCircle2,
@@ -17,22 +17,23 @@ import './Home.css'
 
 const steps = [
   {
-    icon: MessageCircle,
+    icon: MousePointerClick,
     step: '01',
-    title: 'დაგვიკავშირდი',
-    description: 'აღწერე პრობლემა ან საჭირო სერვისი — მოკლე ფორმით.',
+    title: 'გამოიძახე დახმარება',
+    description:
+      'აირჩიე კატეგორია, აღწერე პრობლემა და მიუთითე პრიორიტეტი — ისევე მარტივად, როგორც ტაქსი.',
   },
   {
     icon: UserSearch,
     step: '02',
-    title: 'მენეჯერი პოულობს სპეციალისტს',
-    description: 'ჩვენი მენეჯერი შეარჩევს გადამოწმებულ სპეციალისტს თქვენს ამოცანისთვის.',
+    title: 'მენეჯერი აფასებს',
+    description: 'მენეჯერი განგებს ფასს და გიგზავნის შეთავაზებას დადასტურებისთვის.',
   },
   {
     icon: ShieldCheck,
     step: '03',
-    title: 'სამუშაო სრულდება გარანტირებულად',
-    description: 'სამუშაო სრულდება ხარისხის კონტროლით და გარანტიით.',
+    title: 'შემსრულებელი მუშაობს',
+    description: 'ფასის დადასტურების შემდეგ საქმე მიდის გადამოწმებულ შემსრულებელთან.',
   },
 ]
 
@@ -76,14 +77,13 @@ function Home() {
             </Reveal>
             <Reveal delay={160}>
               <p className="hero__text">
-                DIGIT აკავშირებს შენს მოთხოვნას გადამოწმებულ პროფესიონალებთან — ერთი
-                მენეჯერის ხელში, სრული გამჭვირვალობით. არა შემთხვევითი კონტაქტი, არა
-                უპასუხო პროცესი.
+                გამოიძახე IT დახმარება ისევე მარტივად, როგორც ტაქსი — მენეჯერი აფასებს,
+                შემსრულებელი მუშაობს, შენ ხედავ ყველაფერს.
               </p>
             </Reveal>
             <Reveal delay={240} className="hero__actions">
               <Link to="/contact" className="btn btn--primary btn--lg">
-                აირჩიე მოქმედება
+                გამოიძახე დახმარება
                 <ArrowRight size={18} />
               </Link>
               <Link to="/about" className="btn btn--outline btn--lg hero__btn-outline">
@@ -210,7 +210,7 @@ function Home() {
               აღწერე შენი ამოცანა — მენეჯერი მალე დაგიკავშირდება და პროცესი ხელში აიღებს.
             </p>
             <Link to="/contact" className="btn btn--accent btn--lg">
-              აირჩიე მოქმედება
+              გამოიძახე დახმარება
             </Link>
           </Reveal>
         </div>
