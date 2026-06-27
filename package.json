@@ -21,10 +21,12 @@
     "firebase-deploy-indexes": "firebase deploy --only firestore:indexes",
     "firebase-deploy-firestore": "firebase deploy --only firestore",
     "deploy:firestore": "node scripts/deploy-firestore.mjs",
+    "seed-production-manager": "node scripts/seed-production-manager.mjs",
     "setup:production": "node scripts/setup-production.mjs"
   },
   "devDependencies": {
     "firebase": "^12.15.0",
+    "firebase-admin": "^13.4.0",
     "firebase-tools": "^14.9.0",
     "netlify-cli": "^26.1.0"
   }

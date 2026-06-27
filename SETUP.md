@@ -43,12 +43,30 @@ cp frontend/.env.emulator.example frontend/.env
 - Emulator UI: http://127.0.0.1:4000
 - Admin: `admin@gmail.com` / `admin123`
 
-## Production Firebase
+## Production Firebase (Netlify)
 
-1. შექმენი პროექტი [Firebase Console](https://console.firebase.google.com)-ში
-2. ჩართე Authentication (Email/Password) და Firestore
-3. შეავსე `frontend/.env` production მნიშვნელობებით
-4. Firestore rules და indexes გაუშვი:
+1. [Firebase Console](https://console.firebase.google.com) → **digit-96a35**
+2. **Authentication** → Sign-in method → **Email/Password** ჩართული
+3. **Authentication** → **Settings** → **Authorized domains** → Netlify დომენი (მაგ. `*.netlify.app`)
+4. Firestore rules deploy (ერთხელ):
+
+```bash
+firebase login
+npm run deploy:firestore
+```
+
+5. **პირველი manager (production):**
+   - **ვარიანტი A:** `/register`-ზე დარეგისტრირდი `giorgidiasamidze848@gmail.com`-ით → ავტომატურად manager
+   - **ვარიანტი B:** სკრიპტით:
+     ```bash
+     npm run seed-production-manager -- giorgidiasamidze848@gmail.com YourPassword123
+     ```
+
+6. შემდეგ შედი `/admin` ან `/dashboard` იმავე ემაილი/პაროლით.
+
+Netlify env (`netlify.toml`): `VITE_BOOTSTRAP_MANAGER_EMAILS=giorgidiasamidze848@gmail.com`
+
+## Production Firebase (manual)
 
 ```bash
 firebase login

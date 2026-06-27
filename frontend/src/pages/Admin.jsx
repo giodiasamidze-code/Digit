@@ -61,9 +61,14 @@ function AdminLogin({ onLoggedIn, adminSeedError, accessError }) {
           <span className="admin-login__eyebrow">ადმინისტრაცია</span>
           <h1 className="admin-login__title">ადმინისტრაციის პანელი</h1>
           <p className="admin-login__subtitle">შედი მენეჯერის ანგარიშით სისტემის მართვისთვის</p>
-          {import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true' && (
+          {import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true' ? (
             <p className="admin-login__hint">
               ლოკალური admin: admin@gmail.com / admin123
+            </p>
+          ) : (
+            <p className="admin-login__hint">
+              პირველად დარეგისტრირდი{' '}
+              <Link to="/register">/register</Link> გვერდზე manager ემაილით, შემდეგ შედი აქ.
             </p>
           )}
         </div>

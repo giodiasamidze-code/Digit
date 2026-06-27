@@ -90,11 +90,19 @@ service cloud.firestore {
         && request.resource.data.developerRequestStatus in ['none', 'pending'];
     }
 
+    function isBootstrapManagerEmail(email) {
+      return email is string
+        && email.lower() in [
+          'admin@gmail.com',
+          'giorgidiasamidze848@gmail.com'
+        ];
+    }
+
     function isBootstrapManagerCreate(userId) {
       return request.auth != null
         && request.auth.uid == userId
         && request.resource.data.role == 'manager'
-        && request.resource.data.email == 'admin@gmail.com'
+        && isBootstrapManagerEmail(request.resource.data.email)
         && request.resource.data.developerRequestStatus == 'none';
     }
 
