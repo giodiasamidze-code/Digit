@@ -1,9 +1,19 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { EMULATOR_FIREBASE_CONFIG } from './lib/emulatorFirebaseEnv.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const outPath = join(root, 'frontend/public/firebase-config.json')
+
+const CONFIG_KEYS = [
+  ['VITE_FIREBASE_API_KEY', 'apiKey'],
+  ['VITE_FIREBASE_AUTH_DOMAIN', 'authDomain'],
+  ['VITE_FIREBASE_PROJECT_ID', 'projectId'],
+  ['VITE_FIREBASE_STORAGE_BUCKET', 'storageBucket'],
+  ['VITE_FIREBASE_MESSAGING_SENDER_ID', 'messagingSenderId'],
+  ['VITE_FIREBASE_APP_ID', 'appId'],
+]
 
 function loadEnvFile() {
   if (process.env.NETLIFY === 'true' || process.env.CI === 'true') return
@@ -26,28 +36,54 @@ function loadEnvFile() {
   }
 }
 
+function readExistingConfig() {
+  if (!existsSync(outPath)) return null
+
+  try {
+    const parsed = JSON.parse(readFileSync(outPath, 'utf8'))
+    const hasValues = CONFIG_KEYS.some(([, configKey]) => {
+      const value = parsed?.[configKey]
+      return typeof value === 'string' && value.trim()
+    })
+    return hasValues ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+function pickConfigValue(envKey, configKey, existingConfig, fallbackConfig) {
+  const fromEnv = process.env[envKey]?.trim()
+  if (fromEnv) return fromEnv
+
+  const fromExisting = existingConfig?.[configKey]
+  if (typeof fromExisting === 'string' && fromExisting.trim()) {
+    return fromExisting.trim()
+  }
+
+  const fromFallback = fallbackConfig?.[configKey]
+  if (typeof fromFallback === 'string' && fromFallback.trim()) {
+    return fromFallback.trim()
+  }
+
+  return ''
+}
+
 loadEnvFile()
 
-const envKeys = [
-  'VITE_FIREBASE_API_KEY',
-  'VITE_FIREBASE_AUTH_DOMAIN',
-  'VITE_FIREBASE_PROJECT_ID',
-  'VITE_FIREBASE_STORAGE_BUCKET',
-  'VITE_FIREBASE_MESSAGING_SENDER_ID',
-  'VITE_FIREBASE_APP_ID',
-]
+const useEmulator = process.env.VITE_USE_FIREBASE_EMULATOR === 'true'
+const existingConfig = readExistingConfig()
+const fallbackConfig = useEmulator ? EMULATOR_FIREBASE_CONFIG : existingConfig
 
-const firebaseConfig = {
-  apiKey: process.env.VITE_FIREBASE_API_KEY || '',
-  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN || '',
-  projectId: process.env.VITE_FIREBASE_PROJECT_ID || '',
-  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET || '',
-  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
-  appId: process.env.VITE_FIREBASE_APP_ID || '',
-}
+const firebaseConfig = Object.fromEntries(
+  CONFIG_KEYS.map(([envKey, configKey]) => [
+    configKey,
+    pickConfigValue(envKey, configKey, existingConfig, fallbackConfig),
+  ]),
+)
 
 writeFileSync(outPath, `${JSON.stringify(firebaseConfig, null, 2)}\n`)
 
+const envKeys = CONFIG_KEYS.map(([envKey]) => envKey)
 const missing = envKeys.filter((key) => !process.env[key]?.trim())
 const isRemoteBuild =
   process.env.NETLIFY === 'true' ||
@@ -59,7 +95,11 @@ const isDemoConfig =
   firebaseConfig.projectId === 'demo-homework' ||
   firebaseConfig.apiKey.toLowerCase().includes('demokey')
 
-if (missing.length === 0 && !isDemoConfig) {
+const hasWrittenConfig = CONFIG_KEYS.every(
+  ([, configKey]) => typeof firebaseConfig[configKey] === 'string' && firebaseConfig[configKey].trim(),
+)
+
+if (hasWrittenConfig && !isDemoConfig) {
   console.log('Firebase config ready for production build.')
 } else if (isRemoteBuild) {
   console.error('\n❌ Netlify build failed: Firebase is not configured for production.\n')
@@ -73,6 +113,11 @@ if (missing.length === 0 && !isDemoConfig) {
   console.error('\n  Also set: VITE_USE_FIREBASE_EMULATOR=false')
   console.error('  Then: Deploys → Trigger deploy → Clear cache and deploy site\n')
   process.exit(1)
-} else if (missing.length > 0) {
-  console.warn(`Firebase env missing locally (${missing.join(', ')}). Using frontend/.env if present.`)
+} else if (!hasWrittenConfig) {
+  console.warn(
+    `Firebase env missing locally (${missing.join(', ')}). ` +
+      'Create frontend/.env from frontend/.env.example or run npm run dev:all.',
+  )
+} else if (useEmulator) {
+  console.log('Firebase config ready for local emulator.')
 }
