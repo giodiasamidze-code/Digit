@@ -27,7 +27,7 @@ homework/
 
 ```bash
 npm run install:all
-cp frontend/.env.example frontend/.env
+cp frontend/.env.emulator.example frontend/.env
 npm run dev:all
 ```
 

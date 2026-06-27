@@ -19,7 +19,7 @@ function FirebaseSetupNotice({ variant = 'default' }) {
       <p className="firebase-setup__text">
         {isProduction
           ? 'Production-ზე საჭიროა ნამდვილი Firebase პროექტი. არ გამოიყენო demo-homework / emulator მნიშვნელობები.'
-          : 'ლოკალურად შეავსე frontend/.env (იხ. frontend/.env.example) და გაუშვი npm run dev:all.'}
+          : 'ლოკალურად შექმენი frontend/.env (იხ. frontend/.env.emulator.example) და გაუშვი npm run dev:all.'}
       </p>
       {!compact && (
         <ol className="firebase-setup__steps">
@@ -54,8 +54,8 @@ function FirebaseSetupNotice({ variant = 'default' }) {
             </>
           ) : (
             <li>
-              ჩაწერე მნიშვნელობები <code>frontend/.env</code>-ში და გაუშვი{' '}
-              <code>npm run dev:all</code>
+              ჩაწერე მნიშვნელობები <code>frontend/.env</code>-ში (შაბლონი:{' '}
+              <code>frontend/.env.emulator.example</code>) და გაუშვი <code>npm run dev:all</code>
             </li>
           )}
         </ol>

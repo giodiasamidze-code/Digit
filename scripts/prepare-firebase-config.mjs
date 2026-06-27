@@ -116,7 +116,7 @@ if (hasWrittenConfig && !isDemoConfig) {
 } else if (!hasWrittenConfig) {
   console.warn(
     `Firebase env missing locally (${missing.join(', ')}). ` +
-      'Create frontend/.env from frontend/.env.example or run npm run dev:all.',
+      'Create frontend/.env from frontend/.env.emulator.example or run npm run dev:all.',
   )
 } else if (useEmulator) {
   console.log('Firebase config ready for local emulator.')

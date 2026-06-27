@@ -24,10 +24,10 @@ homework/
 ```bash
 # root დირექტორიიდან
 npm run install:all
-cp frontend/.env.example frontend/.env
+cp frontend/.env.emulator.example frontend/.env
 ```
 
-`frontend/.env`-ში emulator რეჟიმისთვის დატოვე `VITE_USE_FIREBASE_EMULATOR=true` და demo მნიშვნელობები.
+`npm run dev:all` emulator env-ს ავტომატურად რთავს; `.env` საჭიროა მხოლოდ `npm run dev`-ისთვის emulator-ით.
 
 ## გაშვება
 
