@@ -59,11 +59,13 @@ function Contact() {
   const autoRequestSentRef = useRef(false)
 
   const tab = TABS[activeTab]
+  const customerNameRef = useRef('')
   const customerName = useMemo(
     () =>
       userProfile?.name || user?.displayName || user?.email?.split('@')[0] || 'მომხმარებელი',
     [userProfile?.name, user?.displayName, user?.email],
   )
+  customerNameRef.current = customerName
 
   const currentChatKey = user ? `${user.uid}_${activeTab}_${serviceId || ''}` : ''
   const displayConversationId = loadedChatKey === currentChatKey ? conversationId : null
@@ -92,12 +94,23 @@ function Contact() {
 
     let unsubscribeMessages = () => {}
     let cancelled = false
+    const chatKey = currentChatKey
+
+    const finishLoading = (message = '') => {
+      if (cancelled) return
+      if (message) setActionError(message)
+      setLoadedChatKey(chatKey)
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      finishLoading('მოთხოვნების ჩატვირთვა ძალიან ხანს გრძელდება. გადატვირთე გვერდი.')
+    }, 15000)
 
     async function initConversation() {
       try {
         const convId = await findOrCreateOpenConversation({
           customerId: user.uid,
-          customerName,
+          customerName: customerNameRef.current,
           type: activeTab,
           serviceRequested: serviceId,
         })
@@ -109,22 +122,22 @@ function Contact() {
         unsubscribeMessages = subscribeToMessages(
           convId,
           (firestoreMessages) => {
+            window.clearTimeout(timeoutId)
             if (cancelled) return
             setMessages(firestoreMessages)
-            setLoadedChatKey(currentChatKey)
+            setLoadedChatKey(chatKey)
+            setActionError('')
           },
-          () => {
-            if (!cancelled) {
-              setActionError('მოთხოვნების ჩატვირთვა ვერ მოხერხდა.')
-              setLoadedChatKey(currentChatKey)
-            }
+          (err) => {
+            window.clearTimeout(timeoutId)
+            console.error('Contact messages subscription error:', err)
+            finishLoading('მოთხოვნების ჩატვირთვა ვერ მოხერხდა.')
           },
         )
-      } catch {
-        if (!cancelled) {
-          setActionError('მოთხოვნის გაგზავნა ვერ მოხერხდა.')
-          setLoadedChatKey(currentChatKey)
-        }
+      } catch (err) {
+        window.clearTimeout(timeoutId)
+        console.error('Contact conversation init error:', err)
+        finishLoading('მოთხოვნის გაგზავნა ვერ მოხერხდა.')
       }
     }
 
@@ -132,9 +145,10 @@ function Contact() {
 
     return () => {
       cancelled = true
+      window.clearTimeout(timeoutId)
       unsubscribeMessages()
     }
-  }, [user, customerName, activeTab, serviceId, isFirebaseConfigured, currentChatKey])
+  }, [user, activeTab, serviceId, isFirebaseConfigured, currentChatKey])
 
   useEffect(() => {
     if (
