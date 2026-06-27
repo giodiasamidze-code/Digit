@@ -18,11 +18,15 @@ service cloud.firestore {
     }
 
     function isStaff() {
-      return userRole() in ['manager', 'developer'];
+      return userRole() in ['manager', 'developer', 'admin'];
+    }
+
+    function isAdmin() {
+      return userRole() == 'admin';
     }
 
     function isManager() {
-      return userRole() == 'manager';
+      return userRole() == 'manager' || isAdmin();
     }
 
     function isAssignedDeveloper(orderData) {
@@ -31,7 +35,7 @@ service cloud.firestore {
     }
 
     function staffRole() {
-      return userRole();
+      return userRole() == 'admin' ? 'manager' : userRole();
     }
 
     function conversationDoc(conversationId) {
@@ -106,6 +110,14 @@ service cloud.firestore {
         && request.resource.data.developerRequestStatus == 'none';
     }
 
+    function isBootstrapAdminCreate(userId) {
+      return request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.role == 'admin'
+        && request.resource.data.email.lower() == 'admin@gmail.com'
+        && request.resource.data.developerRequestStatus == 'none';
+    }
+
     function validUserSelfUpdate() {
       return request.resource.data.role == resource.data.role
         && (
@@ -142,13 +154,16 @@ service cloud.firestore {
         && resource.data.keys().hasAll(['role'])
         && (resource.data.role == 'developer' || resource.data.role == 'manager');
 
+      allow list: if isAdmin();
+
       allow create: if request.auth != null
         && request.auth.uid == userId
-        && (validUserCreate() || isBootstrapManagerCreate(userId));
+        && (validUserCreate() || isBootstrapManagerCreate(userId) || isBootstrapAdminCreate(userId));
 
       allow update: if request.auth != null && (
         (request.auth.uid == userId && validUserSelfUpdate())
         || isManager()
+        || isAdmin()
       );
 
       match /internalChatInbox/{chatId} {
@@ -165,6 +180,7 @@ service cloud.firestore {
 
     match /registrations/{registrationId} {
       allow read: if isManager()
+        || isAdmin()
         || (request.auth != null && request.auth.uid == registrationId);
 
       allow create: if request.auth != null
@@ -177,10 +193,16 @@ service cloud.firestore {
         && request.resource.data.developerRequestStatus is string;
 
       allow update: if isManager()
+        || isAdmin()
         || (
           request.auth.uid == registrationId
           && request.resource.data.uid == registrationId
         );
+    }
+
+    match /siteContent/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     match /orders/{orderId} {

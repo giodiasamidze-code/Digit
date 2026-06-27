@@ -21,7 +21,7 @@ import {
 } from '../services/chatService'
 import { getServiceById } from '../data/services'
 import { MANAGER_REPLY_ACTIONS } from '../constants/clickActions'
-import { isManagerRole } from '../utils/roles'
+import { isManagerOrAdminRole, getStaffConversationType } from '../utils/roles'
 import usePageMeta from '../hooks/usePageMeta'
 import { pageTitle } from '../constants/brand'
 import './Dashboard.css'
@@ -49,7 +49,8 @@ function Dashboard({ initialTab = 'admin' }) {
   const navigate = useNavigate()
   const { user, userProfile, logout } = useAuth()
   const role = userProfile?.role
-  const isManager = isManagerRole(role)
+  const staffType = getStaffConversationType(role)
+  const canManage = isManagerOrAdminRole(role)
 
   const [mainTab, setMainTab] = useState(initialTab)
   const [statusFilter, setStatusFilter] = useState('open')
@@ -89,7 +90,7 @@ function Dashboard({ initialTab = 'admin' }) {
     if (!role) return undefined
 
     const unsubscribe = subscribeToConversations(
-      role,
+      staffType,
       statusFilter,
       (list) => {
         setConversations(list)
@@ -108,7 +109,7 @@ function Dashboard({ initialTab = 'admin' }) {
     )
 
     return unsubscribe
-  }, [role, statusFilter])
+  }, [staffType, statusFilter])
 
   useEffect(() => {
     if (!selectedId) {
@@ -143,7 +144,7 @@ function Dashboard({ initialTab = 'admin' }) {
     try {
       await sendStaffMessage(selectedId, {
         senderId: user.uid,
-        senderRole: role,
+        senderRole: staffType,
         text: action.message,
       })
     } catch (err) {
@@ -164,7 +165,7 @@ function Dashboard({ initialTab = 'admin' }) {
     try {
       await sendPriceOffer(selectedId, {
         senderId: user.uid,
-        senderRole: role,
+        senderRole: staffType,
         price,
         description,
         serviceType:
@@ -233,7 +234,7 @@ function Dashboard({ initialTab = 'admin' }) {
     await logout()
   }
 
-  const isAdminView = isManager && mainTab === 'admin'
+  const isAdminView = canManage && mainTab === 'admin'
 
   return (
     <div className={`dashboard ${isAdminView ? 'dashboard--admin' : ''}`}>
@@ -248,7 +249,7 @@ function Dashboard({ initialTab = 'admin' }) {
           </h1>
         </div>
         <div className="dashboard-header__actions">
-          {isManager && (
+          {canManage && (
             <div className="dashboard-main-tabs">
               <button
                 type="button"
@@ -296,15 +297,15 @@ function Dashboard({ initialTab = 'admin' }) {
 
       {error && <div className="dashboard-error">{error}</div>}
 
-      {isManager && mainTab === 'admin' ? (
+      {canManage && mainTab === 'admin' ? (
         <DeveloperRequestsPanel />
-      ) : isManager && mainTab === 'orders' ? (
+      ) : canManage && mainTab === 'orders' ? (
         <ManagerOrdersPanel
           managerName={userProfile?.name || user?.email || 'მენეჯერი'}
           initialOrderId={focusOrderId}
           onError={handleError}
         />
-      ) : isManager && mainTab === 'internal' ? (
+      ) : canManage && mainTab === 'internal' ? (
         <div className="dashboard-internal">
           <InternalChatsPanel
             user={user}
@@ -387,7 +388,7 @@ function Dashboard({ initialTab = 'admin' }) {
                     )}
                   </div>
                   <div className="dashboard-chat__header-actions">
-                    {isManager && selectedConversation?.status === 'open' && (
+                    {canManage && selectedConversation?.status === 'open' && (
                       <>
                         <button
                           type="button"
@@ -406,7 +407,7 @@ function Dashboard({ initialTab = 'admin' }) {
                         </button>
                       </>
                     )}
-                    {isManager && (
+                    {canManage && (
                       <button
                         type="button"
                         className="dashboard-chat__delete-btn"

@@ -11,6 +11,13 @@ import { db } from '../firebase'
 import { DEVELOPER_REQUEST_STATUS } from '../utils/roles'
 import { updateUserRegistration } from './registrationService'
 
+export const ASSIGNABLE_ROLES = [
+  { value: 'customer', label: 'ბიზნესი' },
+  { value: 'manager', label: 'მენეჯერი' },
+  { value: 'developer', label: 'შემსრულებელი' },
+  { value: 'admin', label: 'ადმინი' },
+]
+
 function requireDb() {
   if (!db) {
     throw new Error('Firebase არ არის კონფიგურირებული.')
@@ -121,5 +128,50 @@ export async function rejectDeveloperRequest(userId, reviewerId) {
     developerRequestStatus: DEVELOPER_REQUEST_STATUS.REJECTED,
     reviewedAt: serverTimestamp(),
     reviewedBy: reviewerId,
+  })
+}
+
+export function subscribeToAllUsers(onUsers, onError) {
+  const firestore = requireDb()
+
+  return onSnapshot(
+    collection(firestore, 'users'),
+    (snapshot) => {
+      const users = snapshot.docs
+        .map((docSnap) => ({
+          id: docSnap.id,
+          ...docSnap.data(),
+        }))
+        .sort((a, b) => (a.email || '').localeCompare(b.email || ''))
+      onUsers(users)
+    },
+    onError,
+  )
+}
+
+export async function updateUserRole(userId, role, adminId) {
+  const firestore = requireDb()
+  const updates = {
+    role,
+    updatedAt: serverTimestamp(),
+    updatedBy: adminId,
+  }
+
+  if (role === 'developer') {
+    updates.developerRequestStatus = DEVELOPER_REQUEST_STATUS.APPROVED
+    updates.developerReviewedAt = serverTimestamp()
+    updates.developerReviewedBy = adminId
+  } else {
+    updates.developerRequestStatus = DEVELOPER_REQUEST_STATUS.NONE
+  }
+
+  await updateDoc(doc(firestore, 'users', userId), updates)
+
+  await updateUserRegistration(userId, {
+    role,
+    accountType: role === 'developer' ? 'developer' : role === 'manager' ? 'manager' : 'customer',
+    developerRequestStatus: updates.developerRequestStatus,
+    reviewedAt: serverTimestamp(),
+    reviewedBy: adminId,
   })
 }

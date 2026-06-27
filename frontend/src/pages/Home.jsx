@@ -11,9 +11,12 @@ import {
 import Reveal from '../components/Reveal'
 import ControlBridge from '../components/ControlBridge'
 import usePageMeta from '../hooks/usePageMeta'
-import { pageTitle, SITE_DESCRIPTION } from '../constants/brand'
-import { popularServices } from '../data/services'
+import { useSiteContent } from '../context/SiteContentContext'
+import { pageTitle } from '../constants/brand'
+import { allServices } from '../data/services'
 import './Home.css'
+
+const serviceIcons = new Map(allServices.map((service) => [service.id, service.icon]))
 
 const steps = [
   {
@@ -56,7 +59,20 @@ const trustPoints = [
 ]
 
 function Home() {
-  usePageMeta(pageTitle('სანდო სერვისების პლატფორმა'), SITE_DESCRIPTION)
+  const { content } = useSiteContent()
+  const featuredServices = (content.services || [])
+    .filter((service) => service.enabled !== false && service.id !== 'custom')
+    .map((service) => ({
+      ...service,
+      icon: serviceIcons.get(service.id),
+    }))
+    .filter((service) => service.icon)
+
+  usePageMeta(
+    pageTitle('სანდო სერვისების პლატფორმა'),
+    content.siteDescription ||
+      'DIGIT — სანდო სერვისების პლატფორმა. გადამოწმებული სპეციალისტები ერთი მენეჯერის კონტროლით.',
+  )
 
   return (
     <div className="home">
@@ -65,21 +81,18 @@ function Home() {
         <div className="container hero__inner">
           <div className="hero__content">
             <Reveal variant="fade" className="hero__eyebrow-wrap">
-              <span className="hero__eyebrow">DIGIT · შუამავალი კონტროლი</span>
+              <span className="hero__eyebrow">{content.heroEyebrow}</span>
             </Reveal>
             <Reveal delay={80}>
               <span className="relay-line" />
               <h1 className="hero__title">
-                შენ არ ეძებ სპეციალისტს.
+                {content.heroTitle}
                 <br />
-                <span className="hero__title-accent">შენ იღებ კონტროლს.</span>
+                <span className="hero__title-accent">{content.heroTitleAccent}</span>
               </h1>
             </Reveal>
             <Reveal delay={160}>
-              <p className="hero__text">
-                გამოიძახე IT დახმარება ისევე მარტივად, როგორც ტაქსი — მენეჯერი აფასებს,
-                შემსრულებელი მუშაობს, შენ ხედავ ყველაფერს.
-              </p>
+              <p className="hero__text">{content.heroSubtitle}</p>
             </Reveal>
             <Reveal delay={240} className="hero__actions">
               <Link to="/contact" className="btn btn--primary btn--lg">
@@ -138,7 +151,7 @@ function Home() {
           </Reveal>
 
           <div className="services-grid">
-            {popularServices.map(({ id, icon: Icon, title, description }, index) => (
+            {featuredServices.map(({ id, icon: Icon, title, description }, index) => (
               <Reveal key={id} className="service-card" delay={index * 70} variant="up">
                 <div className="service-card__thread" aria-hidden="true" />
                 <div className="service-card__icon">

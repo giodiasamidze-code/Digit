@@ -4,11 +4,15 @@ import Footer from './Footer'
 import FirebaseSetupNotice from './FirebaseSetupNotice'
 import { useAuth } from '../context/AuthContext'
 import { isFirebaseConfigured } from '../firebase'
-import { isManagerRole, resolveUserRole } from '../utils/roles'
+import { isAdminRole, isManagerRole, resolveUserRole } from '../utils/roles'
 
 function Layout() {
   const { user, userProfile, loading } = useAuth()
   const role = resolveUserRole(userProfile)
+
+  if (!loading && user && isAdminRole(role)) {
+    return <Navigate to="/admin" replace />
+  }
 
   if (!loading && user && isManagerRole(role)) {
     return <Navigate to="/dashboard" replace />

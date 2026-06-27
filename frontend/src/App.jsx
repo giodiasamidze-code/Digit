@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { SiteContentProvider } from './context/SiteContentContext'
 import Layout from './components/Layout'
 import RoleProtectedRoute from './components/RoleProtectedRoute'
 import Home from './pages/Home'
@@ -18,6 +19,7 @@ import NotFound from './pages/NotFound'
 function App() {
   return (
     <AuthProvider>
+      <SiteContentProvider>
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
@@ -48,7 +50,7 @@ function App() {
         <Route
           path="/dashboard"
           element={
-            <RoleProtectedRoute allowedRoles={['manager']}>
+            <RoleProtectedRoute allowedRoles={['manager', 'admin']}>
               <Dashboard key="admin" initialTab="admin" />
             </RoleProtectedRoute>
           }
@@ -57,7 +59,7 @@ function App() {
         <Route
           path="/dashboard/chats"
           element={
-            <RoleProtectedRoute allowedRoles={['manager']}>
+            <RoleProtectedRoute allowedRoles={['manager', 'admin']}>
               <Dashboard key="chats" initialTab="chats" />
             </RoleProtectedRoute>
           }
@@ -66,7 +68,7 @@ function App() {
         <Route
           path="/dashboard/internal"
           element={
-            <RoleProtectedRoute allowedRoles={['manager']}>
+            <RoleProtectedRoute allowedRoles={['manager', 'admin']}>
               <Dashboard key="internal" initialTab="internal" />
             </RoleProtectedRoute>
           }
@@ -75,7 +77,7 @@ function App() {
         <Route
           path="/dashboard/orders"
           element={
-            <RoleProtectedRoute allowedRoles={['manager']}>
+            <RoleProtectedRoute allowedRoles={['manager', 'admin']}>
               <Dashboard key="orders" initialTab="orders" />
             </RoleProtectedRoute>
           }
@@ -92,6 +94,7 @@ function App() {
 
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </SiteContentProvider>
     </AuthProvider>
   )
 }

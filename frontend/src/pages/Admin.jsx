@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
+import { LogIn } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import DigitMark from '../components/DigitMark'
 import FirebaseSetupNotice from '../components/FirebaseSetupNotice'
+import SuperAdminPanel from '../components/admin/SuperAdminPanel'
 import { getAuthErrorMessage, validateEmail, validatePassword } from '../utils/authErrors'
 import {
   DEVELOPER_REQUEST_STATUS,
+  isAdminRole,
   isManagerRole,
-  isStaffRole,
 } from '../utils/roles'
 import { ensureAdminAccount } from '../utils/ensureAdminAccount'
 import usePageMeta from '../hooks/usePageMeta'
-import { pageTitle, SITE_NAME } from '../constants/brand'
+import { pageTitle } from '../constants/brand'
 import './Auth.css'
 import './Admin.css'
 
@@ -50,92 +51,87 @@ function AdminLogin({ onLoggedIn, adminSeedError, accessError }) {
   }
 
   return (
-    <div className="admin-login">
-      <div className="admin-login__ambient" aria-hidden="true" />
-      <div className="admin-login__card">
-        <div className="admin-login__brand">
-          <div className="admin-login__logo-row">
-            <DigitMark size="sm" />
-            <span className="admin-login__logo-text">{SITE_NAME}</span>
-          </div>
-          <span className="admin-login__eyebrow">ადმინისტრაცია</span>
-          <h1 className="admin-login__title">ადმინისტრაციის პანელი</h1>
-          <p className="admin-login__subtitle">შედი მენეჯერის ანგარიშით სისტემის მართვისთვის</p>
-          {import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true' ? (
-            <p className="admin-login__hint">
-              ლოკალური admin: admin@gmail.com / admin123
-            </p>
-          ) : (
-            <p className="admin-login__hint">
-              პირველად დარეგისტრირდი{' '}
-              <Link to="/register">/register</Link> გვერდზე manager ემაილით, შემდეგ შედი აქ.
-            </p>
+    <>
+      <div className="admin-page__brand">
+        <span className="admin-page__badge">Super Admin</span>
+        <h1 className="admin-page__title">ადმინ პანელი</h1>
+        <p className="admin-page__subtitle">საიტის და მომხმარებლების სრული მართვა</p>
+        {import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true' && (
+          <p className="admin-login__hint">
+            ლოკალური admin: admin@gmail.com / admin123
+          </p>
+        )}
+      </div>
+
+      {!isFirebaseConfigured && <FirebaseSetupNotice variant="compact" />}
+      {(adminSeedError || accessError || formError) && (
+        <div className="admin-login__alerts">
+          {adminSeedError && <div className="auth-form__alert">{adminSeedError}</div>}
+          {accessError && <div className="auth-form__alert">{accessError}</div>}
+          {formError && <div className="auth-form__alert">{formError}</div>}
+        </div>
+      )}
+
+      <form className="auth-form" onSubmit={handleSubmit} noValidate>
+        <div className="auth-form__field">
+          <label htmlFor="admin-email" className="auth-form__label">
+            ელ. ფოსტა
+          </label>
+          <input
+            id="admin-email"
+            type="email"
+            autoComplete="email"
+            className={`auth-form__input ${fieldErrors.email ? 'auth-form__input--error' : ''}`}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={submitting || !isFirebaseConfigured}
+          />
+          {fieldErrors.email && <span className="auth-form__error">{fieldErrors.email}</span>}
+        </div>
+
+        <div className="auth-form__field">
+          <label htmlFor="admin-password" className="auth-form__label">
+            პაროლი
+          </label>
+          <input
+            id="admin-password"
+            type="password"
+            autoComplete="current-password"
+            className={`auth-form__input ${fieldErrors.password ? 'auth-form__input--error' : ''}`}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={submitting || !isFirebaseConfigured}
+          />
+          {fieldErrors.password && (
+            <span className="auth-form__error">{fieldErrors.password}</span>
           )}
         </div>
 
-        {!isFirebaseConfigured && <FirebaseSetupNotice variant="compact" />}
-        {(adminSeedError || accessError || formError) && (
-          <div className="admin-login__alerts">
-            {adminSeedError && <div className="auth-form__alert">{adminSeedError}</div>}
-            {accessError && <div className="auth-form__alert">{accessError}</div>}
-            {formError && <div className="auth-form__alert">{formError}</div>}
-          </div>
-        )}
+        <button
+          type="submit"
+          className="btn btn--accent btn--lg auth-form__submit"
+          disabled={submitting || !isFirebaseConfigured}
+        >
+          {submitting ? (
+            'იტვირთება...'
+          ) : (
+            <>
+              <LogIn size={18} />
+              Admin შესვლა
+            </>
+          )}
+        </button>
+      </form>
 
-        <form className="auth-form" onSubmit={handleSubmit} noValidate>
-          <div className="auth-form__field">
-            <label htmlFor="admin-email" className="auth-form__label">
-              ელ. ფოსტა
-            </label>
-            <input
-              id="admin-email"
-              type="email"
-              autoComplete="email"
-              className={`auth-form__input ${fieldErrors.email ? 'auth-form__input--error' : ''}`}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={submitting || !isFirebaseConfigured}
-            />
-            {fieldErrors.email && <span className="auth-form__error">{fieldErrors.email}</span>}
-          </div>
-
-          <div className="auth-form__field">
-            <label htmlFor="admin-password" className="auth-form__label">
-              პაროლი
-            </label>
-            <input
-              id="admin-password"
-              type="password"
-              autoComplete="current-password"
-              className={`auth-form__input ${fieldErrors.password ? 'auth-form__input--error' : ''}`}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={submitting || !isFirebaseConfigured}
-            />
-            {fieldErrors.password && (
-              <span className="auth-form__error">{fieldErrors.password}</span>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            className="btn btn--accent btn--lg auth-form__submit"
-            disabled={submitting || !isFirebaseConfigured}
-          >
-            {submitting ? 'იტვირთება...' : 'შესვლა'}
-          </button>
-        </form>
-
-        <p className="admin-login__footer">
-          <Link to="/">მთავარი გვერდი</Link>
-        </p>
-      </div>
-    </div>
+      <p className="admin-page__footer">
+        მენეჯერი ხარ? <Link to="/login">შესვლა</Link> · <Link to="/">მთავარი გვერდი</Link>
+      </p>
+    </>
   )
 }
 
 function Admin() {
-  usePageMeta(pageTitle('ადმინისტრაცია'), 'DIGIT — ადმინისტრაციის პანელი.')
+  usePageMeta(pageTitle('ადმინ პანელი'), 'DIGIT — სრული ადმინისტრაცია.')
 
   const { user, userProfile, loading, logout, refreshUserProfile } = useAuth()
   const [checkingAccess, setCheckingAccess] = useState(false)
@@ -180,13 +176,13 @@ function Admin() {
 
       if (profile?.developerRequestStatus === DEVELOPER_REQUEST_STATUS.PENDING) {
         await logout()
-        setAccessError('თქვენი დეველოპერის მოთხოვნა admin-ის დადასტურებას ელოდება.')
+        setAccessError('შემსრულებლის მოთხოვნა admin-ის დადასტურებას ელოდება.')
         return
       }
 
-      if (!isStaffRole(profile?.role)) {
+      if (!isAdminRole(profile?.role)) {
         await logout()
-        setAccessError('ამ ანგარიშს არ აქვს admin წვდომა.')
+        setAccessError('ამ ანგარიშს არ აქვს super admin წვდომა. მენეჯერი ხარ? გამოიყენე /login.')
       }
     } finally {
       setCheckingAccess(false)
@@ -195,10 +191,18 @@ function Admin() {
 
   if (loading || checkingAccess || !adminReady) {
     return (
-      <div className="admin-login">
+      <div className="admin-page">
         <div className="auth-loading">
           <div className="auth-loading__spinner" aria-label="იტვირთება..." />
         </div>
+      </div>
+    )
+  }
+
+  if (user && isAdminRole(userProfile?.role)) {
+    return (
+      <div className="admin-page admin-page--wide">
+        <SuperAdminPanel />
       </div>
     )
   }
@@ -212,11 +216,15 @@ function Admin() {
   }
 
   return (
-    <AdminLogin
-      onLoggedIn={handleLoggedIn}
-      adminSeedError={adminSeedError}
-      accessError={accessError}
-    />
+    <div className="admin-page">
+      <div className="admin-page__panel">
+        <AdminLogin
+          onLoggedIn={handleLoggedIn}
+          adminSeedError={adminSeedError}
+          accessError={accessError}
+        />
+      </div>
+    </div>
   )
 }
 
